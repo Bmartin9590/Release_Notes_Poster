@@ -16,8 +16,13 @@ const previewJql = $("#previewJql");
 const previewColumns = $("#previewColumns");
 const previewMaxIssues = $("#previewMaxIssues");
 const previewDateNote = $("#previewDateNote");
+const confirmedInput = $("#confirmed");
 
 let pollTimer = null;
+
+function syncRunButton() {
+  runButton.disabled = !confirmedInput.checked;
+}
 
 function setLog(lines) {
   outputLog.textContent = lines && lines.length ? lines.join("\n") : "Waiting for output...";
@@ -34,6 +39,9 @@ function setJobStatus(job) {
   jobStatus.textContent = labels[job.status] || "Waiting";
   runButton.disabled = job.status === "queued" || job.status === "running";
   previewButton.disabled = job.status === "queued" || job.status === "running";
+  if (job.status !== "queued" && job.status !== "running") {
+    syncRunButton();
+  }
 
   if (job.pageUrl) {
     pageLink.href = job.pageUrl;
@@ -118,8 +126,15 @@ form.addEventListener("submit", async (event) => {
 
   const payload = {
     ...currentPayload(),
-    confirmed: $("#confirmed").checked,
+    confirmed: confirmedInput.checked,
   };
+
+  if (!payload.confirmed) {
+    jobStatus.textContent = "Confirmation required";
+    setLog(["Check the confirmation box before posting to Confluence."]);
+    syncRunButton();
+    return;
+  }
 
   runButton.disabled = true;
   jobStatus.textContent = "Starting";
@@ -172,6 +187,7 @@ previewButton.addEventListener("click", async () => {
     handleError(error);
   } finally {
     previewButton.disabled = false;
+    syncRunButton();
   }
 });
 
@@ -182,6 +198,9 @@ function handleError(error) {
   previewButton.disabled = false;
   jobStatus.textContent = "Failed";
   setLog([error.message || String(error)]);
+  syncRunButton();
 }
 
+confirmedInput.addEventListener("change", syncRunButton);
+syncRunButton();
 loadConfig().catch(handleError);
