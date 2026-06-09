@@ -671,24 +671,36 @@ def testrail_request(
 
 def testrail_get_runs(config: TestRailConfig) -> List[Dict[str, Any]]:
     runs: List[Dict[str, Any]] = []
-    offset = 0
-    while True:
-        payload = testrail_request(
-            config,
-            "GET",
-            f"get_runs/{config.project_id}&limit=250&offset={offset}",
-        )
-        if isinstance(payload, dict) and "runs" in payload:
-            batch = payload.get("runs", [])
-            runs.extend(batch)
-            next_link = (payload.get("_links") or {}).get("next")
-            if not next_link:
-                break
-            offset += int(payload.get("limit") or len(batch) or 250)
-            continue
-        if isinstance(payload, list):
-            runs.extend(payload)
-        break
+    seen: set[int] = set()
+    for is_completed in (0, 1):
+        offset = 0
+        while True:
+            payload = testrail_request(
+                config,
+                "GET",
+                f"get_runs/{config.project_id}&is_completed={is_completed}&limit=250&offset={offset}",
+            )
+            if isinstance(payload, dict) and "runs" in payload:
+                batch = payload.get("runs", [])
+                for run in batch:
+                    run_id = int(run.get("id") or 0)
+                    if run_id in seen:
+                        continue
+                    seen.add(run_id)
+                    runs.append(run)
+                next_link = (payload.get("_links") or {}).get("next")
+                if not next_link:
+                    break
+                offset += int(payload.get("limit") or len(batch) or 250)
+                continue
+            if isinstance(payload, list):
+                for run in payload:
+                    run_id = int(run.get("id") or 0)
+                    if run_id in seen:
+                        continue
+                    seen.add(run_id)
+                    runs.append(run)
+            break
     return runs
 
 
@@ -748,6 +760,8 @@ def expected_run_names(config: TestRailConfig, release: str, environment: str) -
             f"{release} - {environment}",
         ]
     )
+    if environment == "PROD":
+        exact_names.append(f"{release} - {environment} (Smoke Testing)")
 
     deduped: List[str] = []
     seen: set[str] = set()
@@ -777,10 +791,14 @@ def pick_release_run(
     for run in testrail_get_runs(config):
         name = str(run.get("name") or "")
         normalized = normalize_run_name(name)
+        exact_match = normalized in target_exact_names
+        release_match = release_token in normalized
+        if not exact_match and not release_match:
+            continue
         score = 0
-        if normalized in target_exact_names:
+        if exact_match:
             score += 100
-        if release_token in normalized:
+        if release_match:
             score += 30
         if env_token in normalized:
             score += 20

@@ -39,11 +39,21 @@ OPENAI_MODEL=gpt-5-mini
 Optional TestRail settings:
 
 ```dotenv
-TESTRAIL_PROJECT_ID=123
+TESTRAIL_BASE_URL=https://your-testrail.example.com
+TESTRAIL_USERNAME=your.email@example.com
+TESTRAIL_API_KEY=replace_me
+TESTRAIL_PROJECT_ID=123  # optional; if omitted, the original poster searches accessible projects
+TESTRAIL_PROJECT_NAME=WMS & MMDL  # optional; filters accessible projects by name
+TESTRAIL_RUN_ID_DEV=12345  # optional; bypasses name search for DEV
+TESTRAIL_RUN_ID_VAL=12346  # optional; bypasses name search for VAL
+TESTRAIL_RUN_ID_PROD=12347  # optional; bypasses name search for PROD
+TESTRAIL_RUN_NAME_TEMPLATE_DEV={release} - DEV (Functional Testing)
 TESTRAIL_RUN_NAME_TEMPLATE_VAL={release} - VAL (Regression Testing)
 TESTRAIL_RUN_NAME_TEMPLATE_PROD={release} - PROD (Smoke Testing)
+TESTRAIL_ENV_LABEL_DEV=DEV Functional Testing
 TESTRAIL_ENV_LABEL_VAL=VAL Regression Testing
 TESTRAIL_ENV_LABEL_PROD=PROD Smoke Testing
+TESTRAIL_ATTACH_SNAPSHOT=true
 ```
 
 `ReleaseNotesCopilot.py` also tries to reuse TestRail credentials from [CaseForge/.env](/Users/64055/Automation/CaseForge/.env).
@@ -87,7 +97,7 @@ Then open:
 http://127.0.0.1:8770
 ```
 
-The UI runs `./run.sh`, which calls `Scripts/ReleaseNotesPoster.py`. It does not use `run_copilot.sh`, `ReleaseNotesCopilot.py`, OpenAI settings, or TestRail settings.
+The UI runs `./run.sh`, which calls `Scripts/ReleaseNotesPoster.py`. It does not use `run_copilot.sh`, `ReleaseNotesCopilot.py`, or OpenAI settings. If TestRail settings are present, the poster looks for DEV, VAL, and PROD TestRail runs, attaches generated quality snapshots to the Confluence page, and embeds the TestRail validation section at the bottom of the page. If `TESTRAIL_RUN_ID_DEV`, `TESTRAIL_RUN_ID_VAL`, or `TESTRAIL_RUN_ID_PROD` is set, the original poster uses that exact run for the matching environment; otherwise, if `TESTRAIL_PROJECT_ID` is omitted, it searches accessible TestRail projects for matching runs. Set `TESTRAIL_PROJECT_NAME=WMS & MMDL` to filter that accessible project list by name.
 
 Use `Preview` to review the page title, release sentence, Jira macro JQL, columns, and issue limit without creating or updating a Confluence page.
 
