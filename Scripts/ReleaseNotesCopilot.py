@@ -110,6 +110,7 @@ class ConfluenceConfig:
     base_url: str
     space_key: str
     parent_path: str
+    create_parent_path: bool
     session: requests.Session
 
 
@@ -259,6 +260,7 @@ def build_confluence_config() -> ConfluenceConfig:
     token = (os.getenv("CONF_TOKEN") or "").strip()
     username = (os.getenv("CONF_USERNAME") or "").strip()
     password = (os.getenv("CONF_PASSWORD") or "").strip()
+    create_parent_path = env_bool("CONF_CREATE_PARENT_PATH", False)
 
     if not base_url or not space_key:
         raise RuntimeError("Missing CONF_BASE_URL or CONF_SPACE_KEY")
@@ -279,6 +281,7 @@ def build_confluence_config() -> ConfluenceConfig:
         base_url=base_url,
         space_key=space_key,
         parent_path=parent_path,
+        create_parent_path=create_parent_path,
         session=session,
     )
 
@@ -348,7 +351,7 @@ def confluence_search_title(conf: ConfluenceConfig, title: str) -> List[Dict[str
     url = f"{conf.base_url}/rest/api/content"
     resp = conf.session.get(
         url,
-        params={"spaceKey": conf.space_key, "title": title},
+        params={"spaceKey": conf.space_key, "title": title, "type": "page", "status": "current"},
         timeout=60,
     )
     _raise(resp, "Title search")
@@ -447,13 +450,26 @@ def confluence_resolve_or_create_path(conf: ConfluenceConfig, path: str) -> str:
         raise ValueError("Empty CONF_PARENT_PATH")
 
     hits = confluence_search_title(conf, parts[0])
-    parent_id = hits[0]["id"] if hits else confluence_create_root(conf, parts[0])
+    if hits:
+        parent_id = hits[0]["id"]
+    else:
+        if not conf.create_parent_path:
+            raise RuntimeError(
+                f"CONF_PARENT_PATH root page not found: {parts[0]}. "
+                "Fix CONF_PARENT_PATH or set CONF_CREATE_PARENT_PATH=true to auto-create missing pages."
+            )
+        parent_id = confluence_create_root(conf, parts[0])
 
     for segment in parts[1:]:
         child_id = confluence_find_child_by_title(conf, parent_id, segment)
         if child_id:
             parent_id = child_id
         else:
+            if not conf.create_parent_path:
+                raise RuntimeError(
+                    f"CONF_PARENT_PATH segment not found under its expected parent: {segment}. "
+                    "Fix CONF_PARENT_PATH or set CONF_CREATE_PARENT_PATH=true to auto-create missing pages."
+                )
             parent_id = confluence_create_child(conf, segment, parent_id, "<p>(auto-created)</p>")
     return parent_id
 

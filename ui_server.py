@@ -56,6 +56,7 @@ def config_status() -> dict:
         "confluenceBaseUrl": config.get("CONF_BASE_URL", ""),
         "spaceKey": config.get("CONF_SPACE_KEY", ""),
         "parentPath": config.get("CONF_PARENT_PATH", ""),
+        "createParentPath": config.get("CONF_CREATE_PARENT_PATH", "").lower() in {"1", "true", "yes", "on"},
         "jiraBaseUrl": config.get("JIRA_BASE_URL", ""),
         "jiraProjectKey": config.get("JIRA_PROJECT_KEY", ""),
         "hasConfluenceToken": bool(config.get("CONF_TOKEN") or config.get("CONF_PASSWORD")),

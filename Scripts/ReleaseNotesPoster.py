@@ -20,7 +20,14 @@ Env:
 import os
 import sys
 import html
+import warnings
 from pathlib import Path
+
+warnings.filterwarnings(
+    "ignore",
+    message=r"urllib3 v2 only supports OpenSSL 1\.1\.1\+.*",
+)
+
 import requests
 from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
@@ -37,6 +44,7 @@ load_dotenv(dotenv_path=Path(".env.local"), override=True)
 CONF_BASE = (os.getenv("CONF_BASE_URL") or "").rstrip("/")
 CONF_SPACE_KEY = (os.getenv("CONF_SPACE_KEY") or "").strip()
 CONF_PARENT_PATH = (os.getenv("CONF_PARENT_PATH") or "Product Teams/MAC Suite/MAC Suite Teams/Knight Riders/WMS & MMDL Releases").strip()
+CONF_CREATE_PARENT_PATH = (os.getenv("CONF_CREATE_PARENT_PATH", "false").strip().lower() in {"1", "true", "yes", "on"})
 
 CONF_TOKEN = os.getenv("CONF_TOKEN")
 CONF_USERNAME = os.getenv("CONF_USERNAME")
@@ -106,7 +114,11 @@ def get_space_or_fail(space_key: str):
 
 def search_title(space_key: str, title: str):
     url = f"{CONF_BASE}/rest/api/content"
-    r = conf.get(url, params={"spaceKey": space_key, "title": title}, timeout=60)
+    r = conf.get(
+        url,
+        params={"spaceKey": space_key, "title": title, "type": "page", "status": "current"},
+        timeout=60,
+    )
     _raise(r, "Title search")
     return _json_or_error(r, "Title search").get("results", [])
 
@@ -189,7 +201,14 @@ def resolve_or_create_path(space_key: str, path: str) -> str:
 
     # root
     root_title = parts[0]
-    parent_id = find_page_by_title(space_key, root_title) or create_root(space_key, root_title)
+    parent_id = find_page_by_title(space_key, root_title)
+    if not parent_id:
+        if not CONF_CREATE_PARENT_PATH:
+            raise RuntimeError(
+                f"CONF_PARENT_PATH root page not found: {root_title}. "
+                "Fix CONF_PARENT_PATH or set CONF_CREATE_PARENT_PATH=true to auto-create missing pages."
+            )
+        parent_id = create_root(space_key, root_title)
 
     # descend
     for seg in parts[1:]:
@@ -197,12 +216,12 @@ def resolve_or_create_path(space_key: str, path: str) -> str:
         if child_id:
             parent_id = child_id
         else:
-            existing_id = find_page_by_title(space_key, seg)
-            if existing_id:
-                print(f"[INFO] Reusing existing page in space for path segment: {seg}")
-                parent_id = existing_id
-            else:
-                parent_id = create_child(space_key, seg, parent_id, "<p>(auto-created)</p>")
+            if not CONF_CREATE_PARENT_PATH:
+                raise RuntimeError(
+                    f"CONF_PARENT_PATH segment not found under its expected parent: {seg}. "
+                    "Fix CONF_PARENT_PATH or set CONF_CREATE_PARENT_PATH=true to auto-create missing pages."
+                )
+            parent_id = create_child(space_key, seg, parent_id, "<p>(auto-created)</p>")
     return parent_id
 
 # ---------------------------

@@ -15,7 +15,8 @@ Create `.env.local` in this folder with your Confluence and Jira settings:
 CONF_BASE_URL=https://your-confluence.example.com
 CONF_TOKEN=replace_me
 CONF_SPACE_KEY=ABC
-CONF_PARENT_PATH=Product Teams/MAC Suite/MAC Suite Teams/Knight Riders/WMS & MMDL Releases
+CONF_PARENT_PATH=Medicaid and CHIP Business Information Solution (MACBIS)/MACBIS Archive/ARCHIVE - MAC Suite Teams/Knight Riders/WMS & MMDL Releases
+CONF_CREATE_PARENT_PATH=false
 
 JIRA_BASE_URL=https://your-jira.example.com
 JIRA_TOKEN=replace_me
@@ -89,6 +90,8 @@ http://127.0.0.1:8770
 The UI runs `./run.sh`, which calls `Scripts/ReleaseNotesPoster.py`. It does not use `run_copilot.sh`, `ReleaseNotesCopilot.py`, OpenAI settings, or TestRail settings.
 
 Use `Preview` to review the page title, release sentence, Jira macro JQL, columns, and issue limit without creating or updating a Confluence page.
+
+By default, posting expects `CONF_PARENT_PATH` to already exist in Confluence. If a path segment is missing, the run fails with the missing segment name instead of creating pages in an unexpected location. Set `CONF_CREATE_PARENT_PATH=true` only if you want the scripts to auto-create missing parent pages.
 
 macOS launcher:
 

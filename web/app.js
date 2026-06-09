@@ -80,7 +80,10 @@ async function loadConfig() {
   }
 
   const confParts = [config.spaceKey, config.confluenceBaseUrl].filter(Boolean);
-  confSummary.textContent = confParts.length ? confParts.join(" at ") : "Missing Confluence settings";
+  const parentMode = config.createParentPath ? "auto-create parents on" : "auto-create parents off";
+  confSummary.textContent = confParts.length
+    ? `${confParts.join(" at ")} (${parentMode})`
+    : "Missing Confluence settings";
 
   const jiraParts = [config.jiraProjectKey, config.jiraBaseUrl].filter(Boolean);
   jiraSummary.textContent = jiraParts.length ? jiraParts.join(" at ") : "Jira date lookup optional";
