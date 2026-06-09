@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Release Notes Poster</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Release notes poster">
+        <header class="topbar">
+          <div>
+            <h1>Release Notes Poster</h1>
+            <p>Original Confluence poster flow</p>
+          </div>
+          <div class="status-pill" id="configStatus">Checking settings</div>
+        </header>
+
+        <div class="layout">
+          <form class="panel form-panel" id="releaseForm">
+            <div class="field">
+              <label for="release">Release</label>
+              <input id="release" name="release" type="text" placeholder="WMS_07.00_2026" autocomplete="off" required />
+            </div>
+
+            <div class="field">
+              <label for="releaseDate">Release date</label>
+              <input id="releaseDate" name="releaseDate" type="date" />
+              <p class="field-note">Leave blank to use the Jira version release date.</p>
+            </div>
+
+            <div class="summary-box">
+              <div>
+                <span>Confluence</span>
+                <strong id="confSummary">Not loaded</strong>
+              </div>
+              <div>
+                <span>Jira project</span>
+                <strong id="jiraSummary">Not loaded</strong>
+              </div>
+            </div>
+
+            <label class="confirm-row">
+              <input id="confirmed" type="checkbox" />
+              <span>Create or update the Confluence release notes page.</span>
+            </label>
+
+            <div class="button-row">
+              <button class="secondary-button preview-button" id="previewButton" type="button">Preview</button>
+              <button class="primary-button" id="runButton" type="submit">Post Release Notes</button>
+            </div>
+          </form>
+
+          <section class="panel output-panel" aria-label="Run output">
+            <div class="output-header">
+              <div>
+                <h2>Run Output</h2>
+                <p id="jobStatus">Waiting for a release</p>
+              </div>
+              <a id="pageLink" class="secondary-button hidden" href="#" target="_blank" rel="noreferrer">Open Page</a>
+            </div>
+            <article class="preview-card hidden" id="previewCard" aria-label="Release notes preview">
+              <div class="preview-meta">
+                <span>Preview only</span>
+                <strong id="previewTitle"></strong>
+              </div>
+              <p id="previewSentence"></p>
+              <dl>
+                <div>
+                  <dt>JQL</dt>
+                  <dd><code id="previewJql"></code></dd>
+                </div>
+                <div>
+                  <dt>Columns</dt>
+                  <dd id="previewColumns"></dd>
+                </div>
+                <div>
+                  <dt>Max issues</dt>
+                  <dd id="previewMaxIssues"></dd>
+                </div>
+              </dl>
+              <p class="preview-note" id="previewDateNote"></p>
+            </article>
+            <pre id="outputLog">Ready.</pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
