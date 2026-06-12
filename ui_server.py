@@ -7,6 +7,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -18,7 +19,7 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parent
 WEB_ROOT = ROOT / "web"
 ENV_PATH = ROOT / ".env.local"
-RUNNER = ROOT / "run.sh"
+RUNNER = ROOT / "run_poster.py"
 HOST = "127.0.0.1"
 DEFAULT_PORT = 8770
 
@@ -110,11 +111,11 @@ def run_job(job_id: str) -> None:
         release = job["release"]
         release_date = job["releaseDate"]
 
-    command = [str(RUNNER), release]
+    command = [sys.executable, str(RUNNER), release]
     if release_date:
         command.append(release_date)
 
-    append_output(job_id, f"$ ./run.sh {release}{' ' + release_date if release_date else ''}")
+    append_output(job_id, f"$ python run_poster.py {release}{' ' + release_date if release_date else ''}")
 
     try:
         process = subprocess.Popen(
@@ -161,7 +162,7 @@ def create_job(payload: dict) -> tuple[int, dict]:
     if not confirmed:
         return 400, {"error": "Confirm that this should create or update the Confluence page."}
     if not RUNNER.exists():
-        return 500, {"error": "run.sh was not found."}
+        return 500, {"error": "run_poster.py was not found."}
 
     job_id = uuid.uuid4().hex
     job = {
