@@ -69,10 +69,23 @@ cd /Users/64055/Automation/Release_Notes_Poster
 ./run.sh WMS_07.00_2026
 ```
 
+On Windows:
+
+```bat
+cd path\to\Release_Notes_Poster
+run.bat WMS_07.00_2026
+```
+
 Pass a release date manually:
 
 ```bash
 ./run.sh WMS_07.00_2026 2026-06-09
+```
+
+On Windows:
+
+```bat
+run.bat WMS_07.00_2026 2026-06-09
 ```
 
 If the date is omitted, the script tries to use the Jira version release date.
@@ -83,6 +96,12 @@ Start the browser UI for the original non-Copilot flow:
 
 ```bash
 python3 ui_server.py
+```
+
+On Windows, double-click `launch_ui.bat` or run:
+
+```bat
+py -3 ui_server.py
 ```
 
 Or from the main `Automation` folder:
@@ -97,7 +116,7 @@ Then open:
 http://127.0.0.1:8770
 ```
 
-The UI runs `./run.sh`, which calls `Scripts/ReleaseNotesPoster.py`. It does not use `run_copilot.sh`, `ReleaseNotesCopilot.py`, or OpenAI settings. If TestRail settings are present, the poster looks for DEV, VAL, and PROD TestRail runs, attaches generated quality snapshots to the Confluence page, and embeds the TestRail validation section at the bottom of the page. If `TESTRAIL_RUN_ID_DEV`, `TESTRAIL_RUN_ID_VAL`, or `TESTRAIL_RUN_ID_PROD` is set, the original poster uses that exact run for the matching environment; otherwise, if `TESTRAIL_PROJECT_ID` is omitted, it searches accessible TestRail projects for matching runs. Set `TESTRAIL_PROJECT_NAME=WMS & MMDL` to filter that accessible project list by name.
+The UI runs `run_poster.py`, which bootstraps `.venv` and calls `Scripts/ReleaseNotesPoster.py` on macOS, Linux, and Windows. It does not use `run_copilot.sh`, `ReleaseNotesCopilot.py`, or OpenAI settings. If TestRail settings are present, the poster looks for DEV, VAL, and PROD TestRail runs, attaches generated quality snapshots to the Confluence page, and embeds the TestRail validation section at the bottom of the page. If `TESTRAIL_RUN_ID_DEV`, `TESTRAIL_RUN_ID_VAL`, or `TESTRAIL_RUN_ID_PROD` is set, the original poster uses that exact run for the matching environment; otherwise, if `TESTRAIL_PROJECT_ID` is omitted, it searches accessible TestRail projects for matching runs. Set `TESTRAIL_PROJECT_NAME=WMS & MMDL` to filter that accessible project list by name.
 
 Use `Preview` to review the page title, release sentence, Jira macro JQL, columns, and issue limit without creating or updating a Confluence page.
 

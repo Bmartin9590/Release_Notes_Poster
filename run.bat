@@ -1,11 +1,10 @@
 @echo off
+setlocal
 cd /d "%~dp0"
 
 where py >nul 2>nul
 if %errorlevel%==0 (
-  py -3 ui_server.py
+  py -3 run_poster.py %*
 ) else (
-  python ui_server.py
+  python run_poster.py %*
 )
-
-if errorlevel 1 pause
