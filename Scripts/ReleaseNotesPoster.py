@@ -872,7 +872,7 @@ def main():
 
     testrail_summaries = get_testrail_summaries(release)
     storage_body = build_storage_body(release, release_date, testrail_summaries=testrail_summaries)
-    page_title = f"{release} — Release Notes"
+    page_title = f"{release}"
 
     parent_id = resolve_or_create_path(CONF_SPACE_KEY, CONF_PARENT_PATH)
 
