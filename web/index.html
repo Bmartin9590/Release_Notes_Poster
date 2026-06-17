@@ -39,7 +39,33 @@
                 <span>Jira project</span>
                 <strong id="jiraSummary">Not loaded</strong>
               </div>
+              <div>
+                <span>TestRail</span>
+                <strong id="testrailSummary">Not loaded</strong>
+              </div>
             </div>
+
+            <section class="optional-panel" aria-label="TestRail run IDs">
+              <div class="optional-heading">
+                <strong>TestRail visuals</strong>
+                <span>Optional</span>
+              </div>
+              <p class="field-note">Enter run IDs to attach result snapshots and a validation summary. Leave blank to use automatic run matching.</p>
+              <div class="run-id-grid">
+                <label for="testrailRunDev">
+                  DEV
+                  <input id="testrailRunDev" type="text" inputmode="numeric" placeholder="Run ID" autocomplete="off" />
+                </label>
+                <label for="testrailRunVal">
+                  VAL
+                  <input id="testrailRunVal" type="text" inputmode="numeric" placeholder="Run ID" autocomplete="off" />
+                </label>
+                <label for="testrailRunProd">
+                  PROD
+                  <input id="testrailRunProd" type="text" inputmode="numeric" placeholder="Run ID" autocomplete="off" />
+                </label>
+              </div>
+            </section>
 
             <label class="confirm-row">
               <input id="confirmed" type="checkbox" required />

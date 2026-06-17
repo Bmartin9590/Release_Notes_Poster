@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430">
+  <rect width="980" height="430" rx="24" fill="#f5f7fb"/>
+  <rect x="24" y="24" width="932" height="382" rx="20" fill="#ffffff" stroke="#d9e1ec"/>
+  <text x="42" y="72" fill="#172033" font-family="Arial, sans-serif" font-size="30" font-weight="800">Sprint 2.2 - System Integration Testing</text>
+  <text x="42" y="108" fill="#657084" font-family="Arial, sans-serif" font-size="17">Sprint 2.2 · R45774</text>
+  <text x="42" y="154" fill="#172033" font-family="Arial, sans-serif" font-size="58" font-weight="800">13</text>
+  <text x="166" y="154" fill="#657084" font-family="Arial, sans-serif" font-size="20">total tests</text>
+  <text x="42" y="188" fill="#657084" font-family="Arial, sans-serif" font-size="16">Linked defects: No linked defects reported</text>
+  <rect x="42" y="218" width="154" height="104" rx="14" fill="#ffffff" stroke="#d9e1ec"/><text x="58" y="254" fill="#657084" font-size="15" font-weight="700">Passed</text><text x="58" y="296" fill="#2f7d5c" font-size="36" font-weight="800">13</text><rect x="222" y="218" width="154" height="104" rx="14" fill="#ffffff" stroke="#d9e1ec"/><text x="238" y="254" fill="#657084" font-size="15" font-weight="700">Failed</text><text x="238" y="296" fill="#b54b3b" font-size="36" font-weight="800">0</text><rect x="402" y="218" width="154" height="104" rx="14" fill="#ffffff" stroke="#d9e1ec"/><text x="418" y="254" fill="#657084" font-size="15" font-weight="700">Blocked</text><text x="418" y="296" fill="#c8922d" font-size="36" font-weight="800">0</text><rect x="582" y="218" width="154" height="104" rx="14" fill="#ffffff" stroke="#d9e1ec"/><text x="598" y="254" fill="#657084" font-size="15" font-weight="700">Retest</text><text x="598" y="296" fill="#7d5fd6" font-size="36" font-weight="800">0</text><rect x="762" y="218" width="154" height="104" rx="14" fill="#ffffff" stroke="#d9e1ec"/><text x="778" y="254" fill="#657084" font-size="15" font-weight="700">Untested</text><text x="778" y="296" fill="#6f7b83" font-size="36" font-weight="800">0</text>
+  <rect x="42" y="350" width="896" height="26" rx="13" fill="#e8edf4"/>
+  <rect x="42.00" y="350" width="896.00" height="26" fill="#2f7d5c"><title>Passed: 13</title></rect>
+</svg>

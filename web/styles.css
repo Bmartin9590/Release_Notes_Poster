@@ -181,6 +181,49 @@ input[type="date"]:focus {
   font-weight: 800;
 }
 
+.optional-panel {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.optional-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.optional-heading strong {
+  font-size: 14px;
+}
+
+.optional-heading span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.run-id-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.run-id-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.run-id-grid input {
+  min-height: 40px;
+  padding: 0 10px;
+}
+
 .confirm-row {
   display: flex;
   align-items: flex-start;
