@@ -9,6 +9,7 @@ const pageLink = $("#pageLink");
 const configStatus = $("#configStatus");
 const confSummary = $("#confSummary");
 const jiraSummary = $("#jiraSummary");
+const testrailSummary = $("#testrailSummary");
 const previewCard = $("#previewCard");
 const previewTitle = $("#previewTitle");
 const previewSentence = $("#previewSentence");
@@ -53,6 +54,11 @@ function currentPayload() {
   return {
     release: $("#release").value.trim(),
     releaseDate: $("#releaseDate").value.trim(),
+    testrailRunIds: {
+      DEV: $("#testrailRunDev").value.trim(),
+      VAL: $("#testrailRunVal").value.trim(),
+      PROD: $("#testrailRunProd").value.trim(),
+    },
   };
 }
 
@@ -95,6 +101,15 @@ async function loadConfig() {
 
   const jiraParts = [config.jiraProjectKey, config.jiraBaseUrl].filter(Boolean);
   jiraSummary.textContent = jiraParts.length ? jiraParts.join(" at ") : "Jira date lookup optional";
+
+  const testrailProject = config.testrailProjectName || config.testrailProjectId;
+  if (config.testrailBaseUrl && config.hasTestRailAuth) {
+    testrailSummary.textContent = testrailProject
+      ? `${testrailProject} at ${config.testrailBaseUrl}`
+      : config.testrailBaseUrl;
+  } else {
+    testrailSummary.textContent = "Optional TestRail settings missing";
+  }
 }
 
 async function pollJob(jobId) {

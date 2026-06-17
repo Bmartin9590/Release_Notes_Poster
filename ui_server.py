@@ -26,7 +26,15 @@ DEFAULT_PORT = 8770
 RELEASE_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REQUIRED_ENV_KEYS = ("CONF_BASE_URL", "CONF_SPACE_KEY")
-SECRET_KEYS = {"CONF_TOKEN", "CONF_PASSWORD", "JIRA_TOKEN", "JIRA_PASSWORD", "SLACK_WEBHOOK_URL"}
+SECRET_KEYS = {
+    "CONF_TOKEN",
+    "CONF_PASSWORD",
+    "JIRA_TOKEN",
+    "JIRA_PASSWORD",
+    "SLACK_WEBHOOK_URL",
+    "TESTRAIL_API_KEY",
+    "TESTRAIL_PASSWORD",
+}
 
 JOBS: dict[str, dict] = {}
 JOBS_LOCK = threading.Lock()
@@ -60,6 +68,13 @@ def config_status() -> dict:
         "createParentPath": config.get("CONF_CREATE_PARENT_PATH", "").lower() in {"1", "true", "yes", "on"},
         "jiraBaseUrl": config.get("JIRA_BASE_URL", ""),
         "jiraProjectKey": config.get("JIRA_PROJECT_KEY", ""),
+        "testrailBaseUrl": config.get("TESTRAIL_BASE_URL", ""),
+        "testrailProjectName": config.get("TESTRAIL_PROJECT_NAME", ""),
+        "testrailProjectId": config.get("TESTRAIL_PROJECT_ID", ""),
+        "hasTestRailAuth": bool(
+            (config.get("TESTRAIL_USERNAME") or config.get("TESTRAIL_EMAIL"))
+            and (config.get("TESTRAIL_API_KEY") or config.get("TESTRAIL_PASSWORD"))
+        ),
         "hasConfluenceToken": bool(config.get("CONF_TOKEN") or config.get("CONF_PASSWORD")),
         "hasJiraToken": bool(config.get("JIRA_TOKEN") or config.get("JIRA_PASSWORD")),
     }
@@ -110,6 +125,7 @@ def run_job(job_id: str) -> None:
         job["status"] = "running"
         release = job["release"]
         release_date = job["releaseDate"]
+        testrail_run_ids = dict(job.get("testrailRunIds") or {})
 
     command = [sys.executable, str(RUNNER), release]
     if release_date:
@@ -125,7 +141,15 @@ def run_job(job_id: str) -> None:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},
+            env={
+                **os.environ,
+                "PYTHONUNBUFFERED": "1",
+                **{
+                    f"TESTRAIL_RUN_ID_{environment}": run_id
+                    for environment, run_id in testrail_run_ids.items()
+                    if run_id
+                },
+            },
         )
 
         assert process.stdout is not None
@@ -155,8 +179,9 @@ def create_job(payload: dict) -> tuple[int, dict]:
     release = str(payload.get("release") or "").strip()
     release_date = str(payload.get("releaseDate") or "").strip()
     confirmed = bool(payload.get("confirmed"))
+    testrail_run_ids = testrail_run_ids_from_payload(payload)
 
-    error = validate_release_inputs(release, release_date)
+    error = validate_release_inputs(release, release_date, testrail_run_ids)
     if error:
         return 400, {"error": error}
     if not confirmed:
@@ -170,6 +195,7 @@ def create_job(payload: dict) -> tuple[int, dict]:
         "status": "queued",
         "release": release,
         "releaseDate": release_date,
+        "testrailRunIds": testrail_run_ids,
         "startedAt": time.time(),
         "finishedAt": None,
         "exitCode": None,
@@ -186,21 +212,42 @@ def create_job(payload: dict) -> tuple[int, dict]:
     return 201, public_job(job)
 
 
-def validate_release_inputs(release: str, release_date: str) -> str:
+def testrail_run_ids_from_payload(payload: dict) -> dict[str, str]:
+    raw = payload.get("testrailRunIds")
+    if not isinstance(raw, dict):
+        return {}
+
+    out: dict[str, str] = {}
+    for environment in ("DEV", "VAL", "PROD"):
+        value = str(raw.get(environment) or "").strip()
+        if value:
+            out[environment] = value
+    return out
+
+
+def validate_release_inputs(
+    release: str,
+    release_date: str,
+    testrail_run_ids: dict[str, str] | None = None,
+) -> str:
     if not release:
         return "Release is required."
     if not RELEASE_RE.match(release):
         return "Release can only include letters, numbers, dots, dashes, and underscores."
     if release_date and not DATE_RE.match(release_date):
         return "Release date must use YYYY-MM-DD format."
+    for environment, run_id in (testrail_run_ids or {}).items():
+        if not run_id.isdigit():
+            return f"TestRail {environment} Run ID must be numeric."
     return ""
 
 
 def create_preview(payload: dict) -> tuple[int, dict]:
     release = str(payload.get("release") or "").strip()
     release_date = str(payload.get("releaseDate") or "").strip()
+    testrail_run_ids = testrail_run_ids_from_payload(payload)
 
-    error = validate_release_inputs(release, release_date)
+    error = validate_release_inputs(release, release_date, testrail_run_ids)
     if error:
         return 400, {"error": error}
 
@@ -227,6 +274,7 @@ def create_preview(payload: dict) -> tuple[int, dict]:
         "jql": jql,
         "columns": columns,
         "maximumIssues": 200,
+        "testrailRunIds": testrail_run_ids,
     }
 
 
